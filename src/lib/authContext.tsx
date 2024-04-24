@@ -42,12 +42,14 @@ export const AuthProvider = ({ children }: Readonly<{ children: React.ReactNode 
                 const q = query(collection(db, "users"), where("uid", "==", user.uid));
                 getDocs(q).then((querySnapshot) => {
                     const usersData = querySnapshot.docs.map((doc) => doc.data());
-                    setUser({
-                        displayName: user.displayName || "",
-                        email: user.email || "",
-                        uid: user.uid || "",
-                        role: usersData[0].role || "",
-                    });
+                    if(usersData[0]?.uid){                    
+                        setUser({
+                            displayName: user.displayName || "",
+                            email: user.email || "",
+                            uid: user.uid || "",
+                            role: usersData[0].role || "",
+                        });
+                    }
                 });
             } else {
                 console.log("No user found");
