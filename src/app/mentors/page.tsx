@@ -69,68 +69,69 @@ export default function Mentors() {
   }
 
   useEffect(()=>{
+
+  // Function to send message to mentors
+    function fetchMessages(uid: string){
+      if (!mentorDetails.mentorId || !user?.uid) {
+        console.log("Mentor ID or UID is missing.");
+        return;
+      }      
+        const roomId = user.uid+"_"+uid;
+        // console.log("Room ID",roomId);
+        const q = query(
+        collection(db,"messages"),
+        where("roomId","==",roomId),
+        orderBy("timestamp","asc"),
+      );
+  
+      const unsubscribe = onSnapshot(q
+        ,(querySnapshot)=>{
+          // console.log("Inside Snapshot")
+          const fetchMessages:DocumentData[] = [];
+          querySnapshot.forEach((doc)=>{
+            fetchMessages.push({...doc.data(),id:doc.id});;
+          });
+            setReceivedMessages(fetchMessages);
+            const observer = new MutationObserver((mutationsList) => {
+              for (const mutation of mutationsList) {
+                  if (mutation.type === 'childList') {
+                      const target = mutation.target as HTMLElement;
+                      target.scroll({ top: target.scrollHeight, behavior: "smooth" });
+                  }
+              }
+            });
+          
+            if (chatContainerRef.current) {
+                observer.observe(chatContainerRef.current, { childList: true });
+            }
+      
+          // if(chatContainerRef.current){
+            //   chatContainerRef.current.addEventListener("DOMNodeInserted",(event:Event)=>{
+              //     const {currentTarget:target}= event;
+              //     if(target instanceof HTMLElement){
+                //       target.scroll({top:target.scrollHeight,behavior:"smooth"});
+                //     }
+                //   })
+                // }
+                return () => {
+                    observer.disconnect();
+                };
+              },(error)=>{
+              console.log("Error",error);
+            }
+          );
+          
+      return () => unsubscribe();
+          
+    };
+
     if(mentorDetails.mentorId){
       fetchMessages(mentorDetails.mentorId);
     }
 
-  },[mentorDetails.mentorId]);
-
-  // Function to send message to mentors
-  function fetchMessages(uid: string){
+  },[mentorDetails.mentorId,user?.uid]);
 
 
-    if (!mentorDetails.mentorId || !user?.uid) {
-      console.log("Mentor ID or UID is missing.");
-      return;
-    }      
-      const roomId = user.uid+"_"+uid;
-      // console.log("Room ID",roomId);
-      const q = query(
-      collection(db,"messages"),
-      where("roomId","==",roomId),
-      orderBy("timestamp","asc"),
-    );
-
-    const unsubscribe = onSnapshot(q
-      ,(querySnapshot)=>{
-        // console.log("Inside Snapshot")
-        const fetchMessages:DocumentData[] = [];
-        querySnapshot.forEach((doc)=>{
-          fetchMessages.push({...doc.data(),id:doc.id});;
-        });
-          setReceivedMessages(fetchMessages);
-          const observer = new MutationObserver((mutationsList) => {
-            for (const mutation of mutationsList) {
-                if (mutation.type === 'childList') {
-                    const target = mutation.target as HTMLElement;
-                    target.scroll({ top: target.scrollHeight, behavior: "smooth" });
-                }
-            }
-          });
-        
-          if (chatContainerRef.current) {
-              observer.observe(chatContainerRef.current, { childList: true });
-          }
-    
-        // if(chatContainerRef.current){
-          //   chatContainerRef.current.addEventListener("DOMNodeInserted",(event:Event)=>{
-            //     const {currentTarget:target}= event;
-            //     if(target instanceof HTMLElement){
-              //       target.scroll({top:target.scrollHeight,behavior:"smooth"});
-              //     }
-              //   })
-              // }
-              return () => {
-                  observer.disconnect();
-              };
-            },(error)=>{
-            console.log("Error",error);
-          }
-        );
-        
-    return () => unsubscribe();
-        
-  };
 
 
   // Function to send message to mentors
@@ -168,7 +169,7 @@ export default function Mentors() {
                         <option value="Product Management">Product Management</option>
                         <option value="Digital Marketing">Digital Marketing</option>
                         <option value="Human Resources">Human Resources</option>
-                        <option value="Human Resources">Human Resource"</option>
+                        <option value="Human Resources">Human Resource</option>
                         <option value="Software Engineering">Software Engineering</option>
                         <option value="Web Development">Web Development</option>
                         <option value="Finance">Finance</option>
