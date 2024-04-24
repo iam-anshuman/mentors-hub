@@ -1,10 +1,10 @@
 'use client'
-import React,{ use, useEffect, useState } from "react";
+import React,{ useRef, useEffect, useState } from "react";
 import { getDocs,collection, DocumentData,query,where,addDoc,serverTimestamp,onSnapshot,limit,orderBy } from "firebase/firestore";
 import { db } from "@/FirebaseConfig";
 import { useAuth } from "@/lib/authContext";
 import { SendIcon } from "../Components/Icons";
-import { time } from "console";
+
 
 export default function Mentors() {
 
@@ -17,9 +17,11 @@ export default function Mentors() {
     mentorId:""
   });
   const {user} = useAuth();
+  const chatContainerRef = useRef<HTMLElement|null>(null);
 
   // Fetching the mentors from the database
   useEffect(()=>{
+    
     async function fetchMentors(){
       setLoading(true);
       const q = query(collection(db,"users"),where("role","==","mentor"));
@@ -76,32 +78,57 @@ export default function Mentors() {
   // Function to send message to mentors
   function fetchMessages(uid: string){
 
+
     if (!mentorDetails.mentorId || !user?.uid) {
       console.log("Mentor ID or UID is missing.");
       return;
     }      
+      const roomId = user.uid+"_"+uid;
+      // console.log("Room ID",roomId);
       const q = query(
       collection(db,"messages"),
-      where("mentorId","==",uid),
-      where("uid","==",user.uid),
+      where("roomId","==",roomId),
       orderBy("timestamp","asc"),
-      limit(20)
     );
 
     const unsubscribe = onSnapshot(q
       ,(querySnapshot)=>{
-        console.log("Inside Snapshot")
+        // console.log("Inside Snapshot")
         const fetchMessages:DocumentData[] = [];
         querySnapshot.forEach((doc)=>{
           fetchMessages.push({...doc.data(),id:doc.id});;
         });
           setReceivedMessages(fetchMessages);
-        },(error)=>{
+          const observer = new MutationObserver((mutationsList) => {
+            for (const mutation of mutationsList) {
+                if (mutation.type === 'childList') {
+                    const target = mutation.target as HTMLElement;
+                    target.scroll({ top: target.scrollHeight, behavior: "smooth" });
+                }
+            }
+          });
+        
+          if (chatContainerRef.current) {
+              observer.observe(chatContainerRef.current, { childList: true });
+          }
+    
+        // if(chatContainerRef.current){
+          //   chatContainerRef.current.addEventListener("DOMNodeInserted",(event:Event)=>{
+            //     const {currentTarget:target}= event;
+            //     if(target instanceof HTMLElement){
+              //       target.scroll({top:target.scrollHeight,behavior:"smooth"});
+              //     }
+              //   })
+              // }
+              return () => {
+                  observer.disconnect();
+              };
+            },(error)=>{
             console.log("Error",error);
           }
         );
         
-    return () => unsubscribe;
+    return () => unsubscribe();
         
   };
 
@@ -114,11 +141,13 @@ export default function Mentors() {
     }
     if(user?.uid){
       const {uid,displayName} = user;
+      const roomId = uid+"_"+mentorDetails.mentorId;
       const messageObj = {
         mentorId : mentorDetails.mentorId,
         uid,
         displayName,
         message,
+        roomId,
         timestamp: serverTimestamp()
       }
       await addDoc(collection(db,"messages"),messageObj);
@@ -154,7 +183,7 @@ export default function Mentors() {
                     </select>
           </div> 
           <dialog id="my_modal_3" className="modal">
-            <div className="modal-box">
+            <div className="modal-box overflow-y-auto"  ref={chatContainerRef as React.RefObject<HTMLDivElement>|null}>
               <form method="dialog">
                 {/* if there is a button in form, it will close the modal */}
                 <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
@@ -180,17 +209,27 @@ export default function Mentors() {
 
 
 
-                return (  <div key={msg.id} className="chat chat-start">
+                return (  
+                  <div key={msg.id} >
+                    {msg.displayName === user?.displayName ?
+                  <div className="chat chat-end">
                     <div className="chat-header">
                       {msg.displayName}
                       <time className="text-xs opacity-50">{timeAgo}</time>
                     </div>
                     <div className="chat-bubble">{msg.message}</div>
-                    <div className="chat-footer opacity-50">
-                      Seen
-                    </div>
                   </div>
+                  :
+                  <div  className="chat chat-start">
+                    <div className="chat-header">
+                      {msg.displayName}
+                      <time className="text-xs opacity-50">{timeAgo}</time>
+                    </div>
+                    <div className="chat-bubble">{msg.message}</div>
+                  </div>
+                  }
                 
+                  </div>
                 )})}
                 <div className="flex">
                   <input type="text" id="message" name="message" placeholder="Enter Message...." className="input input-bordered w-full max-w-xs" value={message} onChange={(e)=>{setMessage(e.target.value)}}/>

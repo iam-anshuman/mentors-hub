@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+.chatbox::-webkit-scrollbar{
+    opacity: 0;
+}
