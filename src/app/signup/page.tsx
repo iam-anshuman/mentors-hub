@@ -6,6 +6,7 @@ import {auth,db} from "@/FirebaseConfig";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { collection, addDoc } from "firebase/firestore";
 import { useAuth } from "@/lib/authContext";
+import MentorsData from "@/lib/MentorsData"
 
 
 export default function SignUp() {
@@ -21,7 +22,7 @@ export default function SignUp() {
     const [error, setError] = useState("");
     const {user,setUser} = useAuth();
 
-    useEffect(()=>{{user?.uid && redirect("/")}},[user?.uid]);
+    useEffect(()=>{{user?.uid && redirect("/")}},[]);
 
     function handleChange(e:React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement> | React.ChangeEvent<HTMLTextAreaElement>){
         const {name,value} =  e.target;

@@ -14,7 +14,7 @@ export default function Login() {
     const [error, setError] = useState<string>("");
     const {user,setUser} = useAuth();
 
-    useEffect(()=>{{user?.uid && redirect("/")}},[user?.uid]);
+    useEffect(()=>{{user?.uid && redirect("/")}},[]);
 
     function handleChange(e:React.ChangeEvent<HTMLInputElement>|React.ChangeEvent<HTMLSelectElement>){
         const {name,value} = e.target;

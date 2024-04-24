@@ -12,6 +12,8 @@ export default function Home() {
 
   const {user,setUser} = useAuth();
 
+  user && console.log(user.displayName,user.email,user.uid);
+
 
   return (
     <>
