@@ -7,12 +7,12 @@ dotenv.config();
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyDp5vTcEIG5qS4IgwKaCw0UMF89MuiXRKc",
-  authDomain: "mentors-connect.firebaseapp.com",
-  projectId: "mentors-connect",
-  storageBucket: "mentors-connect.appspot.com",
-  messagingSenderId: "956262261116",
-  appId: "1:956262261116:web:390c6148bd905ab5b2c4f9"
+  apiKey: "AIzaSyCfAn3u7njE3DHvdyAoi1qQk68px-HzqbQ",
+  authDomain: "mentors-hub-27945.firebaseapp.com",
+  projectId: "mentors-hub-27945",
+  storageBucket: "mentors-hub-27945.appspot.com",
+  messagingSenderId: "319908857871",
+  appId: "1:319908857871:web:6cf3f87a5765b247fd3b7a"
 };
 
 
